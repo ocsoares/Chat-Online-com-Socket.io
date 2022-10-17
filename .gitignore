@@ -1,0 +1,7 @@
+dist
+node_modules
+.env
+TODO.md
+Dockerfile
+docker-compose.yml
+.dockerignore
