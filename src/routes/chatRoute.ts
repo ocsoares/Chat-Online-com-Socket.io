@@ -1,5 +1,6 @@
 import { Request, Response, Router } from 'express';
 import path from 'path';
+import { ChatController } from '../controllers/ChatController';
 
 const chatRoute = Router();
 
@@ -8,14 +9,15 @@ const __dirname = path.resolve();
 const chatEJS = path.join(__dirname, '/src/views/chat.ejs');
 const indexEJS = path.join(__dirname, 'src/views/index.ejs');
 
-chatRoute.get('/', (req: Request, res: Response) => {
+const chatController = new ChatController();
+
+chatRoute.get('/', chatController.blockIfEnterChat, (req: Request, res: Response) => {
     res.render(indexEJS);
 });
 
-chatRoute.post('/', (req: Request, res: Response) => {
-});
+chatRoute.post('/', chatController.enterChat);
 
-chatRoute.get('/chat', (req: Request, res: Response) => {
+chatRoute.get('/chat', chatController.checkIfEnterChat, (req: Request, res: Response) => {
     res.render(chatEJS);
 });
 
