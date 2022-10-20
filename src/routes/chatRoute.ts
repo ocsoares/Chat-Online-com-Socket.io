@@ -17,8 +17,12 @@ chatRoute.get('/', chatController.blockIfEnterChat, (req: Request, res: Response
 
 chatRoute.post('/', chatController.enterChat);
 
-chatRoute.get('/chat', chatController.checkIfEnterChat, (req: Request, res: Response) => {
-    res.render(chatEJS);
+chatRoute.get('/chat', chatController.checkIfEnterChat, chatController.webSocket, (req: Request, res: Response) => {
+    const { username, room } = req.JWT;
+
+    res.render(chatEJS, { username, room });
 });
+
+chatRoute.get('/logout', chatController.checkIfEnterChat, chatController.logout);
 
 export default chatRoute;

@@ -54,7 +54,7 @@ a {
 
 #msg {
     background-color: #B0C4DE;
-    border: none;
+    border: none
 }
 
 .form-control input,
@@ -69,6 +69,24 @@ select {
 
 .chat-sidebar #room-name {
     text-align: center;
+}
+
+.fa-comments,
+.light-color {
+    color: #e6e9ff;
+}
+
+.dark-color {
+    color: #4682B4;
+}
+
+.chat-messages,
+p {
+    color: grey;
+}
+
+.input-color {
+    color: #555555;
 }
 
 .btn {

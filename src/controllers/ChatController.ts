@@ -1,6 +1,8 @@
 import 'dotenv/config';
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
+import { UserModel } from '../models/UserModel';
+import { io } from '../config/exportServersAnd-io';
 
 export class ChatController {
     async enterChat(req: Request, res: Response) {
@@ -8,6 +10,10 @@ export class ChatController {
         const { username, room } = req.body;
 
         try {
+            const saveUser = new UserModel({ username, room });
+
+            await saveUser.save();
+
             const JWT = jwt.sign({
                 username,
                 room
@@ -48,12 +54,46 @@ export class ChatController {
             const verifyJWT = jwt.verify(chat_cookie, process.env.JWT_HASH as string);
 
             if (verifyJWT) {
+                req.JWT = verifyJWT;
                 next();
             }
         }
         catch (error: any) {
-            console.log(error.message);
+            // console.log(error.message);
             return res.redirect('/');
         }
+    }
+
+    async logout(req: Request, res: Response) {
+        const { username } = req.JWT;
+
+        try {
+            await UserModel.findOneAndDelete({ username });
+
+            res.clearCookie('chat_cookie');
+
+            return res.redirect('/');
+        }
+        catch (error: any) {
+            console.log(error.message);
+            res.clearCookie('chat_cookie');
+            return res.redirect('/');
+        }
+    }
+
+    // Usei por aqui porque precisa, no meu caso, ter o JWT que vem do Request !! <<  
+    async webSocket(req: Request, res: Response, next: NextFunction) {
+        const { username, room } = req.JWT;
+        console.log('TA NO WEB SOCKET !');
+
+        console.log('username:', username, 'room:', room);
+
+        io.on('connection', socket => {
+            console.log(socket.id);
+
+            socket.join(room);
+        });
+
+        next();
     }
 }

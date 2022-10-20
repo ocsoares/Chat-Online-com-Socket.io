@@ -1,5 +1,6 @@
 declare namespace Express {
+    import { JwtPayload } from "jsonwebtoken";
     interface Request {
-        teste: any;
+        JWT: JwtPayload;
     }
 }

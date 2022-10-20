@@ -8,6 +8,7 @@ import { server, serverExpressHTTP } from './config/exportServersAnd-io';
 import "./config/websocket"; // Vai AUTOMATICAMENTE Chamar e Executar o Arquivo !! <<
 import session from 'express-session';
 import cookieParser from 'cookie-parser';
+import { connectionAtlas } from './database/mongoose';
 
 // OBS: Para o Docker/compose funcionar com TS e transpilar para JS, basta seguir os scripts e códigos dos Arquivos docker e MANTER RODANDO o
 // script tscdir Localmente para Transpilar e o Docker detectar a mudança !! <<
@@ -26,6 +27,7 @@ server.set('view engine', 'ejs');
 server.use(express.static(__dirname + '/src/views'));
 server.use(express.static(__dirname + '/src/public'));
 server.use(express.static(__dirname + '/dist'));
+server.use(express.static(__dirname + '/assets'));
 
 server.use(cors());
 
@@ -48,4 +50,8 @@ server.use(bodyParser.text({ type: 'text/json' }));
 
 server.use(chatRoute);
 
-serverExpressHTTP.listen(PORT, () => console.log(`Servidor rodando remotamente em ${localhost}:${PORT}`));
+serverExpressHTTP.listen(PORT, async () => {
+    await connectionAtlas();
+
+    console.log(`Servidor rodando remotamente em ${localhost}:${PORT}`);
+});
