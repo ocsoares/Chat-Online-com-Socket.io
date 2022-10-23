@@ -20,6 +20,10 @@ import { connectionAtlas } from './database/mongoose';
 const localhost = 'http://localhost';
 const PORT = 5000;
 
+const teste = new Date();
+console.log(teste);
+console.log(teste.toLocaleString('pt-BR'));
+
 const __dirname = path.resolve();
 
 server.set('view engine', 'ejs');

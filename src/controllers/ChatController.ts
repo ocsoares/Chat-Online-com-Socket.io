@@ -3,6 +3,8 @@ import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 import { UserModel } from '../models/UserModel';
 import { io } from '../config/exportServersAnd-io';
+import { MessageModel } from '../models/MessageModel';
+import { ISendMessage } from '../@types/interfaces';
 
 export class ChatController {
     async enterChat(req: Request, res: Response) {
@@ -43,6 +45,11 @@ export class ChatController {
         }
         catch (error: any) {
             console.log(error.message);
+
+            if (error.message === 'jwt expired') {
+                res.clearCookie('chat_cookie');
+            }
+
             next();
         }
     }
@@ -84,14 +91,43 @@ export class ChatController {
     // Usei por aqui porque precisa, no meu caso, ter o JWT que vem do Request !! <<  
     async webSocket(req: Request, res: Response, next: NextFunction) {
         const { username, room } = req.JWT;
-        console.log('TA NO WEB SOCKET !');
-
         console.log('username:', username, 'room:', room);
 
-        io.on('connection', socket => {
+        // Troquei on por once porque estava REPETINDO o socket.id VÁRIAS vezes !!
+        io.once('connection', socket => {
             console.log(socket.id);
 
             socket.join(room);
+
+            socket.on('sendMessage', async (data: ISendMessage) => {
+                // Salvando a Mensagem
+                data.message = data.message;
+                data.username = username;
+                data.room = room;
+
+                console.log(data);
+
+                let saveMessage: any;
+
+                try {
+                    saveMessage = new MessageModel({
+                        message: data.message,
+                        username: data.username,
+                        room: data.room
+                    });
+
+                    await saveMessage.save();
+
+                    console.log('createdAt controller:', saveMessage.createdAt);
+                    console.log(typeof saveMessage.createdAt); // COLOCAR NO io.to e na INTERFACE <<<
+                }
+                catch (error: any) {
+                    console.log(error.message);
+                }
+
+                // Enviando a Mensagem para a SALA específicada
+                io.to(data.room).emit('sendMessage', saveMessage);
+            });
         });
 
         next();
