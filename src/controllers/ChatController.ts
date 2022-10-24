@@ -88,18 +88,29 @@ export class ChatController {
         }
     }
 
+    // SERVIDOR !!! <<<
     // Usei por aqui porque precisa, no meu caso, ter o JWT que vem do Request !! <<  
     async webSocket(req: Request, res: Response, next: NextFunction) {
         const { username, room } = req.JWT;
         console.log('username:', username, 'room:', room);
 
         // Troquei on por once porque estava REPETINDO o socket.id VÁRIAS vezes !!
-        io.once('connection', socket => {
+        io.once('connection', async socket => {
             console.log(socket.id);
+
+            const socketsRoom = await io.in(room).fetchSockets();
+            console.log('socketRoom:', socketsRoom);
+
+            for (const socket of socketsRoom) {
+                console.log(socket.data);
+                console.log(socket.rooms);
+            }
+
+            // console.log(socketsRoom);
 
             socket.join(room);
 
-            socket.on('sendMessage', async (data: ISendMessage) => {
+            socket.on('sendMessage', async (data: ISendMessage, callback: Function) => {
                 // Salvando a Mensagem
                 data.message = data.message;
                 data.username = username;
@@ -117,9 +128,6 @@ export class ChatController {
                     });
 
                     await saveMessage.save();
-
-                    console.log('createdAt controller:', saveMessage.createdAt);
-                    console.log(typeof saveMessage.createdAt); // COLOCAR NO io.to e na INTERFACE <<<
                 }
                 catch (error: any) {
                     console.log(error.message);

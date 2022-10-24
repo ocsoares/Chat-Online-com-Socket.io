@@ -1,3 +1,5 @@
+// CLIENTE !!! <<<
+
 let io: any; // Declarei assim apenas para NÃO dar ERRO no TS Compilador, porque essa Variável está imbutida no script do HTML !! <<
 
 const socket = io();
@@ -31,24 +33,26 @@ inputMessage.addEventListener('keypress', (event: KeyboardEvent | any) => {
     }
 });
 
-socket.on('sendMessage', (data: any) => {
+socket.on('sendMessage', (data: any, res: any) => {
     // console.log('No navegador (chatScript):', data);
+    console.log('RES:', res);
 
-    console.log(typeof data.createdAt);
-
-    const teste = new Date();
-    console.log(teste);
-    console.log(typeof teste);
+    // A data estava vindo pelo evento 'sendMessage' como STRING, e não como Date, então tive que Converter para Date !! <<
+    const convertToDate = new Date(data.createdAt).toLocaleString('pt-BR');
 
     const chatMessages = document.getElementById('chat-messages') as HTMLElement;
 
     // += Para SOMAR ao HTML Antes já Adicionado (IMPEDE que um Substitua o outro ) !! <<
     chatMessages.innerHTML += `
     <div class="message">
-        <p class="meta">${data.username} <span>${data.createdAt.toLocaleString('pt-BR')}</span></p>
+        <p class="meta">${data.username} <span>${convertToDate}</span></p>
             <p class="text">
                 ${data.message}
         </p>
     </div>
     `;
+});
+
+socket.on('countUser', (data: any) => {
+    console.log('countUser:', data);
 });
