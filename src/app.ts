@@ -5,7 +5,6 @@ import cors from 'cors';
 import path from 'path';
 import chatRoute from './routes/chatRoute';
 import { server, serverExpressHTTP } from './config/exportServersAnd-io';
-import "./config/websocket"; // Vai AUTOMATICAMENTE Chamar e Executar o Arquivo !! <<
 import session from 'express-session';
 import cookieParser from 'cookie-parser';
 import { connectionAtlas } from './database/mongoose';

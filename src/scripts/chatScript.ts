@@ -17,6 +17,28 @@ interface ISendMessage {
 
 const inputMessage = document.getElementById('msg') as HTMLElement;
 
+socket.on('initialMessage', (data: string) => {
+    const currentDate = new Date().toLocaleString('pt-BR');
+
+    addMessage('ChatPapo', currentDate, data);
+});
+
+socket.on('userLogout', (data: string) => {
+    console.log('userLogout:', data);
+});
+
+let usernames: string[] = [];
+
+socket.on('sendUsername', (data: string) => {
+
+    usernames.push(data);
+    console.log('USERNAME:', usernames);
+});
+
+const scrollDown = document.getElementById('chat-messages') as HTMLElement;
+
+scrollDown.scrollTop = scrollDown.scrollHeight; // Scroll para BAIXO !! 
+
 // event: any para ter Acesso ao .value !! <<
 inputMessage.addEventListener('keypress', (event: KeyboardEvent | any) => {
     if (event.key === 'Enter') {
@@ -40,19 +62,26 @@ socket.on('sendMessage', (data: any, res: any) => {
     // A data estava vindo pelo evento 'sendMessage' como STRING, e não como Date, então tive que Converter para Date !! <<
     const convertToDate = new Date(data.createdAt).toLocaleString('pt-BR');
 
-    const chatMessages = document.getElementById('chat-messages') as HTMLElement;
-
-    // += Para SOMAR ao HTML Antes já Adicionado (IMPEDE que um Substitua o outro ) !! <<
-    chatMessages.innerHTML += `
-    <div class="message">
-        <p class="meta">${data.username} <span>${convertToDate}</span></p>
-            <p class="text">
-                ${data.message}
-        </p>
-    </div>
-    `;
+    addMessage(data.username, convertToDate, data.message);
 });
 
 socket.on('countUser', (data: any) => {
     console.log('countUser:', data);
 });
+
+function addMessage(username: string, date: Date | string, message: string) {
+    const chatMessages = document.getElementById('chat-messages') as HTMLElement;
+
+    // += Para SOMAR ao HTML Antes já Adicionado (IMPEDE que um Substitua o outro ) !! <<
+    chatMessages.innerHTML += `
+    <div class="message">
+        <p class="meta">${username} <span>${date}</span></p>
+            <p class="text">
+                ${message}
+        </p>
+    </div>
+    `;
+
+    // Cada Mensagem adicionada, o scroll vai AUTOMATICAMENTE para baixo !! <<
+    scrollDown.scrollTop = scrollDown.scrollHeight;
+}

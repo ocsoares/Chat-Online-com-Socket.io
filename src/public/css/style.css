@@ -151,6 +151,7 @@ p {
     background-color: #B0C4DE;
     max-height: 500px;
     overflow-y: scroll;
+    scroll-behavior: smooth;
 }
 
 .chat-messages .message {

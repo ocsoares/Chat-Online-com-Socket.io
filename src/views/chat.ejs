@@ -56,7 +56,18 @@
                         </div>
                         <% }) %>
 
-                            <% } %>
+                            <% } else { %>
+                                <div class="message">
+                                    <p class="meta">
+                                        ChatPapo <span>
+                                            <%- new Date().toLocaleString('pt-BR') %>
+                                        </span>
+                                    </p>
+                                    <p class="text">
+                                        Seja bem-vindo ao ChatPapo !
+                                    </p>
+                                </div>
+                                <% } %>
             </div>
         </main>
         <div class="chat-form-container">

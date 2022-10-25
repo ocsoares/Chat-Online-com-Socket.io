@@ -79,6 +79,15 @@ export class ChatController {
 
             res.clearCookie('chat_cookie');
 
+            // io.on('connect', socket => {
+            //     console.log(socket.id);
+
+            //     socket.on('disconnect', data => {
+            //         socket.emit('userLogout', `Usuário ${username} desconectado !`);
+            //         console.log('DESCONECTADO !!');
+            //     });
+            // });
+
             return res.redirect('/');
         }
         catch (error: any) {
@@ -96,19 +105,47 @@ export class ChatController {
 
         // Troquei on por once porque estava REPETINDO o socket.id VÁRIAS vezes !!
         io.once('connection', async socket => {
-            console.log(socket.id);
+            console.log('socket ID:', socket.id);
 
-            const socketsRoom = await io.in(room).fetchSockets();
-            console.log('socketRoom:', socketsRoom);
+            // Procurar como NÃO substituir algo no Array !! <<
+            let teste_user: string[] = [];
+            teste_user.push(username);
+            console.log(teste_user);
 
-            for (const socket of socketsRoom) {
-                console.log(socket.data);
-                console.log(socket.rooms);
-            }
+            socket.emit('sendUsername', username);
 
-            // console.log(socketsRoom);
+            const sockets = (await io.fetchSockets()).map(socket => socket.id);
+            console.log(sockets);
+
+            // if (!username || !room) {
+            //     socket.on('disconnect', data => {
+            //         console.log(`Usuário ${username} acabou de sair !`);
+            //     });
+            // }
+
+            socket.emit('initialMessage', `Bem-vindo ao ChatPapo e à sala ${room} !`);
 
             socket.join(room);
+
+            const teste = await io.in(room).fetchSockets();
+
+            let arroz: any[] = [];
+            teste.forEach(teste => arroz.push(teste.rooms, username));
+
+            console.log('ARROZ:', arroz);
+
+
+            // for (const socket of teste) {
+            //     const loggeds = socket.rooms.add({ teste: username } as unknown as string);
+            //     console.log(loggeds);
+
+            //     // const teste = Object.keys(socket.rooms);
+
+
+            //     // if(loggeds){
+            //     //     const teste = loggeds.next()
+            //     // }
+            // }
 
             socket.on('sendMessage', async (data: ISendMessage, callback: Function) => {
                 // Salvando a Mensagem
