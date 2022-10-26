@@ -14,6 +14,38 @@ interface ISendMessage {
     updatedAt: string;
     username: string;
 }
+interface IUserInformation {
+    username: string;
+    user_id: string;
+    socket_id: string;
+}
+
+let connectedUser: object = {};
+let connectedUsersArray: object[] = [];
+
+socket.on('connectedUser', (data: IUserInformation) => {
+    connectedUser = data;
+    console.log(connectedUser);
+
+    connectedUsersArray.push(connectedUser);
+    console.log('connectedUsersARRAY:', connectedUsersArray);
+
+    addMessage('Conectado:', 'Qualquer hora', data as any);
+});
+
+let teste = null;
+console.log('teste FORA:', teste);
+
+// Tirar o User do Array quando sair !! <<
+socket.on('disconnectUser', (data: IUserInformation) => {
+    teste = 'caiu aqui';
+    console.log('TESTE DENTRO:', teste);
+    console.log(`O usuário com socket '${data.socket_id}' foi disconectado !`);
+});
+
+socket.on('test-room', (data: any) => {
+    console.log('data:', data);
+});
 
 const inputMessage = document.getElementById('msg') as HTMLElement;
 
@@ -25,14 +57,6 @@ socket.on('initialMessage', (data: string) => {
 
 socket.on('userLogout', (data: string) => {
     console.log('userLogout:', data);
-});
-
-let usernames: string[] = [];
-
-socket.on('sendUsername', (data: string) => {
-
-    usernames.push(data);
-    console.log('USERNAME:', usernames);
 });
 
 const scrollDown = document.getElementById('chat-messages') as HTMLElement;
@@ -63,10 +87,6 @@ socket.on('sendMessage', (data: any, res: any) => {
     const convertToDate = new Date(data.createdAt).toLocaleString('pt-BR');
 
     addMessage(data.username, convertToDate, data.message);
-});
-
-socket.on('countUser', (data: any) => {
-    console.log('countUser:', data);
 });
 
 function addMessage(username: string, date: Date | string, message: string) {

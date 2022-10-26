@@ -4,3 +4,9 @@ export interface ISendMessage {
     room: string;
     createdAt: Date;
 }
+
+export interface IUserInformation {
+    username: string;
+    user_id: string;
+    socket_id: string;
+}

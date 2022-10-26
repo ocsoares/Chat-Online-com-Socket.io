@@ -4,7 +4,7 @@ import jwt from 'jsonwebtoken';
 import { UserModel } from '../models/UserModel';
 import { io } from '../config/exportServersAnd-io';
 import { MessageModel } from '../models/MessageModel';
-import { ISendMessage } from '../@types/interfaces';
+import { ISendMessage, IUserInformation } from '../@types/interfaces';
 
 export class ChatController {
     async enterChat(req: Request, res: Response) {
@@ -16,9 +16,12 @@ export class ChatController {
 
             await saveUser.save();
 
+            const searchThisUser = await UserModel.findOne({ username, room });
+
             const JWT = jwt.sign({
                 username,
-                room
+                room,
+                id: searchThisUser!.id
             }, "" + process.env.JWT_HASH, {
                 expiresIn: '5h'
             });
@@ -100,32 +103,38 @@ export class ChatController {
     // SERVIDOR !!! <<<
     // Usei por aqui porque precisa, no meu caso, ter o JWT que vem do Request !! <<  
     async webSocket(req: Request, res: Response, next: NextFunction) {
-        const { username, room } = req.JWT;
-        console.log('username:', username, 'room:', room);
+        const { username, room, id } = req.JWT;
+        console.log('username:', username, 'room:', room, 'id:', id);
+
+        // broadcast = Envia para TODOS, MENOS para você mesmo Conectado !! <<
 
         // Troquei on por once porque estava REPETINDO o socket.id VÁRIAS vezes !!
         io.once('connection', async socket => {
             console.log('socket ID:', socket.id);
 
-            // Procurar como NÃO substituir algo no Array !! <<
-            let teste_user: string[] = [];
-            teste_user.push(username);
-            console.log(teste_user);
+            socket.join(room);
 
-            socket.emit('sendUsername', username);
+            const userInformation: IUserInformation = {
+                username,
+                user_id: id,
+                socket_id: socket.id
+            };
+
+            socket.broadcast.to(room).emit('connectedUser', userInformation);
+
+            socket.on('connectedUser', data => {
+                console.log('connectedUser:', data);
+            });
 
             const sockets = (await io.fetchSockets()).map(socket => socket.id);
             console.log(sockets);
 
-            // if (!username || !room) {
-            //     socket.on('disconnect', data => {
-            //         console.log(`Usuário ${username} acabou de sair !`);
-            //     });
-            // }
+            socket.on('disconnect', data => {
+                console.log(`Usuário com socket '${socket.id}' foi desconectado !`);
+                socket.broadcast.to(room).emit('disconnectUser', userInformation);
+            });
 
             socket.emit('initialMessage', `Bem-vindo ao ChatPapo e à sala ${room} !`);
-
-            socket.join(room);
 
             const teste = await io.in(room).fetchSockets();
 
@@ -133,19 +142,6 @@ export class ChatController {
             teste.forEach(teste => arroz.push(teste.rooms, username));
 
             console.log('ARROZ:', arroz);
-
-
-            // for (const socket of teste) {
-            //     const loggeds = socket.rooms.add({ teste: username } as unknown as string);
-            //     console.log(loggeds);
-
-            //     // const teste = Object.keys(socket.rooms);
-
-
-            //     // if(loggeds){
-            //     //     const teste = loggeds.next()
-            //     // }
-            // }
 
             socket.on('sendMessage', async (data: ISendMessage, callback: Function) => {
                 // Salvando a Mensagem
