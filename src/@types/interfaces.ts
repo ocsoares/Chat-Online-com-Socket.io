@@ -9,4 +9,5 @@ export interface IUserInformation {
     username: string;
     user_id: string;
     socket_id: string;
+    room: string;
 }

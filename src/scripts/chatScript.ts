@@ -7,6 +7,8 @@ const socket = io();
 // emit = Emitir alguma informação = Script js
 // on = Escutar alguma informação = Backend (websocket.ts)
 
+console.log('LOCAL STORAGE:', localStorage);
+
 interface ISendMessage {
     createdAt: Date;
     message: string;
@@ -18,12 +20,22 @@ interface IUserInformation {
     username: string;
     user_id: string;
     socket_id: string;
+    room: string;
 }
 
 let connectedUser: object = {};
 let connectedUsersArray: object[] = [];
 
-socket.on('connectedUser', (data: IUserInformation) => {
+socket.on('nname', (data: any) => {
+    console.log('nname:', data);
+});
+
+socket.once('connectedUser', (data: IUserInformation) => {
+    console.log('USER:', data.username);
+    localStorage.setItem(`${data.user_id}`, data.username);
+
+    addUser(data.username);
+
     connectedUser = data;
     console.log(connectedUser);
 
@@ -31,20 +43,6 @@ socket.on('connectedUser', (data: IUserInformation) => {
     console.log('connectedUsersARRAY:', connectedUsersArray);
 
     addMessage('Conectado:', 'Qualquer hora', data as any);
-});
-
-let teste = null;
-console.log('teste FORA:', teste);
-
-// Tirar o User do Array quando sair !! <<
-socket.on('disconnectUser', (data: IUserInformation) => {
-    teste = 'caiu aqui';
-    console.log('TESTE DENTRO:', teste);
-    console.log(`O usuário com socket '${data.socket_id}' foi disconectado !`);
-});
-
-socket.on('test-room', (data: any) => {
-    console.log('data:', data);
 });
 
 const inputMessage = document.getElementById('msg') as HTMLElement;
@@ -89,11 +87,23 @@ socket.on('sendMessage', (data: any, res: any) => {
     addMessage(data.username, convertToDate, data.message);
 });
 
+function addUser(username: string) {
+    const userID = document.getElementById('users') as HTMLElement;
+
+    userID.innerHTML += `
+    <ul id="users">
+        <li>
+             ${username}
+        </li>
+    </ul>
+    `;
+}
+
 function addMessage(username: string, date: Date | string, message: string) {
-    const chatMessages = document.getElementById('chat-messages') as HTMLElement;
+    const chatMessagesID = document.getElementById('chat-messages') as HTMLElement;
 
     // += Para SOMAR ao HTML Antes já Adicionado (IMPEDE que um Substitua o outro ) !! <<
-    chatMessages.innerHTML += `
+    chatMessagesID.innerHTML += `
     <div class="message">
         <p class="meta">${username} <span>${date}</span></p>
             <p class="text">

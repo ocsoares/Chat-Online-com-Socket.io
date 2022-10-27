@@ -6,6 +6,11 @@ import { io } from '../config/exportServersAnd-io';
 import { MessageModel } from '../models/MessageModel';
 import { ISendMessage, IUserInformation } from '../@types/interfaces';
 
+// >> COLOCAR na Pasta do Curso Udemy Tipagens TS !! <<
+// Tipando um Array de Objetos !! = { [key: string]: string[]; } = {};
+
+let connectedUsers: object[] = [];
+
 export class ChatController {
     async enterChat(req: Request, res: Response) {
         // Fazer um JWT com NOME e ROOM, direcionar para o CHAT e BLOQUEAR essa Rota se estiver "logado" !! <<
@@ -75,21 +80,18 @@ export class ChatController {
     }
 
     async logout(req: Request, res: Response) {
-        const { username } = req.JWT;
+        const { username, room, id } = req.JWT;
 
         try {
             await UserModel.findOneAndDelete({ username });
 
             res.clearCookie('chat_cookie');
 
-            // io.on('connect', socket => {
-            //     console.log(socket.id);
+            // LIMPAR o LocalStorage por AQUI quando Deslogar !! <<
 
-            //     socket.on('disconnect', data => {
-            //         socket.emit('userLogout', `Usuário ${username} desconectado !`);
-            //         console.log('DESCONECTADO !!');
-            //     });
-            // });
+            io.on('connection', socket => {
+                console.log('SOCKET LOG', socket.id);
+            });
 
             return res.redirect('/');
         }
@@ -117,8 +119,25 @@ export class ChatController {
             const userInformation: IUserInformation = {
                 username,
                 user_id: id,
-                socket_id: socket.id
+                socket_id: socket.id,
+                room
             };
+
+            type TCheckID = { user_id?: string; };
+
+            // Confere CADA Valor de uma especificada Chave DENTRO de um Array e verifica se EXISTE (boolean), 
+            // se SIM, retorna true, se NÃO, retorna false !! <<
+            // FAZER para APENAS dar push se NÃO existir !!!!! <<<<  
+            // REMOVER do push no Logout !!!!!! <<<<
+            const teste = connectedUsers.some((el: TCheckID) => el.user_id === id);
+            console.log('TESTE Antes:', teste);
+
+            // IMPORTANTE: Declarei o Array de Objetos FORA da Classe, porque estava RESETANDO a cada Recarregamento da Página !! <<
+            connectedUsers.push(userInformation);
+            console.log('connectedUsers:', connectedUsers);
+
+            const teste_dois = connectedUsers.some((el: TCheckID) => el.user_id === id);
+            console.log('TESTE DEPOIS:', teste_dois);
 
             socket.broadcast.to(room).emit('connectedUser', userInformation);
 
@@ -126,22 +145,11 @@ export class ChatController {
                 console.log('connectedUser:', data);
             });
 
+            // Tentar SALVAR o socket.id no Banco de Dados e Salvar NOVAMENTE sempre que ele for Atualizado !!
             const sockets = (await io.fetchSockets()).map(socket => socket.id);
-            console.log(sockets);
-
-            socket.on('disconnect', data => {
-                console.log(`Usuário com socket '${socket.id}' foi desconectado !`);
-                socket.broadcast.to(room).emit('disconnectUser', userInformation);
-            });
+            console.log('fetchSockets:', sockets);
 
             socket.emit('initialMessage', `Bem-vindo ao ChatPapo e à sala ${room} !`);
-
-            const teste = await io.in(room).fetchSockets();
-
-            let arroz: any[] = [];
-            teste.forEach(teste => arroz.push(teste.rooms, username));
-
-            console.log('ARROZ:', arroz);
 
             socket.on('sendMessage', async (data: ISendMessage, callback: Function) => {
                 // Salvando a Mensagem
