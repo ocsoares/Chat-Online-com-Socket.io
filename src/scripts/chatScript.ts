@@ -7,8 +7,6 @@ const socket = io();
 // emit = Emitir alguma informação = Script js
 // on = Escutar alguma informação = Backend (websocket.ts)
 
-console.log('LOCAL STORAGE:', localStorage);
-
 interface ISendMessage {
     createdAt: Date;
     message: string;
@@ -23,27 +21,47 @@ interface IUserInformation {
     room: string;
 }
 
-let connectedUser: object = {};
-let connectedUsersArray: object[] = [];
-
-socket.on('nname', (data: any) => {
-    console.log('nname:', data);
+socket.on('connectedUser', (data: IUserInformation[]) => {
+    console.log('DATA:', data);
 });
 
-socket.once('connectedUser', (data: IUserInformation) => {
-    console.log('USER:', data.username);
-    localStorage.setItem(`${data.user_id}`, data.username);
+// OBS: Tive que usar Promise porque NÃO estavam pegando os Valores da Variável dentro do Evento ou
+// de uma Variável externa !! <<
 
-    addUser(data.username);
+// socket.on('connectedUser', (data: IUserInformation[]) => {
+//     console.log('sem Promise:', data);
+// });
 
-    connectedUser = data;
-    console.log(connectedUser);
+// socket.on('yourAccount', (data: IUserInformation) => {
+//     console.log('yourAccount:', data);
+// });
 
-    connectedUsersArray.push(connectedUser);
-    console.log('connectedUsersARRAY:', connectedUsersArray);
+// const getUserInformation = new Promise<IUserInformation>((resolve, reject) => {
+// socket.on('yourAccount', (data: IUserInformation) => {
+//     console.log('yourAccount:', data);
+//     socket.on('connectedUser', (user: IUserInformation[]) => {
+//         console.log('connectedUser:', user);
+//         user.forEach(element => {
+//             addUser(element.username);
+//         });
+//     });
+//     // resolve(data);
+// });
+// });
 
-    addMessage('Conectado:', 'Qualquer hora', data as any);
-});
+// const getConnectedUser = new Promise<IUserInformation[]>((resolve, reject) => {
+//     socket.on('connectedUser', (data: IUserInformation[]) => {
+//         resolve(data);
+//     });
+// });
+
+// getUserInformation.then(async (userInformation) => {
+//     console.log('data:', userInformation);
+
+//     // await socket.on('connectedUser', (data: IUserInformation[]) => {
+//     //     console.log('sem Promise:', data);
+//     // });
+// });
 
 const inputMessage = document.getElementById('msg') as HTMLElement;
 

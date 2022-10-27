@@ -9,7 +9,7 @@ import { ISendMessage, IUserInformation } from '../@types/interfaces';
 // >> COLOCAR na Pasta do Curso Udemy Tipagens TS !! <<
 // Tipando um Array de Objetos !! = { [key: string]: string[]; } = {};
 
-let connectedUsers: object[] = [];
+let connectedUsers: IUserInformation[] = [];
 
 export class ChatController {
     async enterChat(req: Request, res: Response) {
@@ -87,10 +87,10 @@ export class ChatController {
 
             res.clearCookie('chat_cookie');
 
-            // LIMPAR o LocalStorage por AQUI quando Deslogar !! <<
-
-            io.on('connection', socket => {
-                console.log('SOCKET LOG', socket.id);
+            connectedUsers = connectedUsers.filter(element => {
+                if (element.user_id !== id) {
+                    return element;
+                }
             });
 
             return res.redirect('/');
@@ -108,7 +108,7 @@ export class ChatController {
         const { username, room, id } = req.JWT;
         console.log('username:', username, 'room:', room, 'id:', id);
 
-        // broadcast = Envia para TODOS, MENOS para você mesmo Conectado !! <<
+        // socket = Envia para TODOS, MENOS para você mesmo Conectado !! <<
 
         // Troquei on por once porque estava REPETINDO o socket.id VÁRIAS vezes !!
         io.once('connection', async socket => {
@@ -123,23 +123,27 @@ export class ChatController {
                 room
             };
 
-            type TCheckID = { user_id?: string; };
+            io.emit('yourAccount', userInformation);
 
             // Confere CADA Valor de uma especificada Chave DENTRO de um Array e verifica se EXISTE (boolean), 
             // se SIM, retorna true, se NÃO, retorna false !! <<
-            // FAZER para APENAS dar push se NÃO existir !!!!! <<<<  
-            // REMOVER do push no Logout !!!!!! <<<<
-            const teste = connectedUsers.some((el: TCheckID) => el.user_id === id);
-            console.log('TESTE Antes:', teste);
+            // REMOVER do push no Logout !!!!!! <<<<        // TIRAR o NOME do JÁ logado !! <<  
+            const checkIfLogged = connectedUsers.some(el => el.user_id === id && el.username);
 
             // IMPORTANTE: Declarei o Array de Objetos FORA da Classe, porque estava RESETANDO a cada Recarregamento da Página !! <<
-            connectedUsers.push(userInformation);
-            console.log('connectedUsers:', connectedUsers);
+            if (!checkIfLogged) {
+                connectedUsers.push(userInformation);
+            }
 
-            const teste_dois = connectedUsers.some((el: TCheckID) => el.user_id === id);
-            console.log('TESTE DEPOIS:', teste_dois);
+            const connectedUsersByRoom = connectedUsers.filter((element) => {
+                if (element.room === room) {
+                    return element;
+                }
+            });
 
-            socket.broadcast.to(room).emit('connectedUser', userInformation);
+            console.log('connectedUsersByRoom:', connectedUsersByRoom);
+
+            io.to(room).emit('connectedUser', connectedUsersByRoom);
 
             socket.on('connectedUser', data => {
                 console.log('connectedUser:', data);
@@ -159,7 +163,7 @@ export class ChatController {
 
                 console.log(data);
 
-                let saveMessage: any;
+                let saveMessage;
 
                 try {
                     saveMessage = new MessageModel({
