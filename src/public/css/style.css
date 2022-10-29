@@ -31,6 +31,13 @@
     --error-color: #d9534f;
 }
 
+.chat-sidebar::-webkit-scrollbar-thumb {
+    width: 12px;
+    background-color: #B0C4DE;
+    -webkit-border-radius: 10px;
+    border-radius: 10px;
+}
+
 * {
     box-sizing: border-box;
     margin: 0;

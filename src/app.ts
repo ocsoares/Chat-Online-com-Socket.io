@@ -8,6 +8,8 @@ import { server, serverExpressHTTP } from './config/exportServersAnd-io';
 import session from 'express-session';
 import cookieParser from 'cookie-parser';
 import { connectionAtlas } from './database/mongoose';
+import connectFlash from 'connect-flash';
+import { Request, Response, NextFunction } from 'express';
 
 // OBS: Para o Docker/compose funcionar com TS e transpilar para JS, basta seguir os scripts e códigos dos Arquivos docker e MANTER RODANDO o
 // script tscdir Localmente para Transpilar e o Docker detectar a mudança !! <<
@@ -42,6 +44,15 @@ server.use(session({
         httpOnly: true
     }
 }));
+
+server.use(connectFlash());
+
+server.use((req: Request, res: Response, next: NextFunction) => {
+    res.locals.successFlash = req.flash('successFlash');
+    res.locals.errorFlash = req.flash('errorFlash');
+
+    next();
+});
 
 server.use(bodyParser.urlencoded({ extended: true }));
 server.use(bodyParser.json());

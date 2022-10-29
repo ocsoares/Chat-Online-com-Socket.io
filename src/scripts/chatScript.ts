@@ -8,12 +8,12 @@ const socket = io();
 // on = Escutar alguma informação = Backend (websocket.ts)
 
 interface ISendMessage {
-    createdAt: Date;
     message: string;
-    room: string;
-    updatedAt: string;
     username: string;
+    room: string;
+    createdAt: Date;
 }
+
 interface IUserInformation {
     username: string;
     user_id: string;
@@ -21,49 +21,38 @@ interface IUserInformation {
     room: string;
 }
 
-socket.on('connectedUser', (data: IUserInformation[]) => {
-    console.log('DATA:', data);
+let connectedUserArray: IUserInformation[] = [];
+
+socket.on('logoutUser', (connectedUser: IUserInformation[]) => {
+    console.log('logoutUser:', connectedUser);
+
+    removeUser(connectedUser);
 });
 
-// OBS: Tive que usar Promise porque NÃO estavam pegando os Valores da Variável dentro do Evento ou
-// de uma Variável externa !! <<
+socket.on('connectedUser', (data: IUserInformation[]) => {
 
-// socket.on('connectedUser', (data: IUserInformation[]) => {
-//     console.log('sem Promise:', data);
-// });
+    console.log('data no chatScript:', data);
 
-// socket.on('yourAccount', (data: IUserInformation) => {
-//     console.log('yourAccount:', data);
-// });
+    // const checkIfLogged = connectedUserArray.some(el => el.user_id ? true : false);
+    // console.log('checkifLogged:', checkIfLogged);
 
-// const getUserInformation = new Promise<IUserInformation>((resolve, reject) => {
-// socket.on('yourAccount', (data: IUserInformation) => {
-//     console.log('yourAccount:', data);
-//     socket.on('connectedUser', (user: IUserInformation[]) => {
-//         console.log('connectedUser:', user);
-//         user.forEach(element => {
-//             addUser(element.username);
-//         });
-//     });
-//     // resolve(data);
-// });
-// });
+    data.forEach(element => {
+        if (!connectedUserArray.find(index => index.user_id === element.user_id)) {
+            connectedUserArray.push(element);
+            addUser(element.username);
 
-// const getConnectedUser = new Promise<IUserInformation[]>((resolve, reject) => {
-//     socket.on('connectedUser', (data: IUserInformation[]) => {
-//         resolve(data);
-//     });
-// });
+        }
+    });
 
-// getUserInformation.then(async (userInformation) => {
-//     console.log('data:', userInformation);
+    // connectedUserArray = data;
+    // removeUser(connectedUserArray);
 
-//     // await socket.on('connectedUser', (data: IUserInformation[]) => {
-//     //     console.log('sem Promise:', data);
-//     // });
-// });
+    console.log('connectedUserArray:', connectedUserArray);
+});
 
 const inputMessage = document.getElementById('msg') as HTMLElement;
+const userID = document.getElementById('users') as HTMLElement;
+const chatMessagesID = document.getElementById('chat-messages') as HTMLElement;
 
 socket.on('initialMessage', (data: string) => {
     const currentDate = new Date().toLocaleString('pt-BR');
@@ -77,7 +66,7 @@ socket.on('userLogout', (data: string) => {
 
 const scrollDown = document.getElementById('chat-messages') as HTMLElement;
 
-scrollDown.scrollTop = scrollDown.scrollHeight; // Scroll para BAIXO !! 
+scrollDown.scrollTop = scrollDown.scrollHeight; // Scroll para BAIXO !!
 
 // event: any para ter Acesso ao .value !! <<
 inputMessage.addEventListener('keypress', (event: KeyboardEvent | any) => {
@@ -95,9 +84,9 @@ inputMessage.addEventListener('keypress', (event: KeyboardEvent | any) => {
     }
 });
 
-socket.on('sendMessage', (data: any, res: any) => {
+socket.on('sendMessage', (data: ISendMessage) => {
     // console.log('No navegador (chatScript):', data);
-    console.log('RES:', res);
+    console.log('messageDATA:', data);
 
     // A data estava vindo pelo evento 'sendMessage' como STRING, e não como Date, então tive que Converter para Date !! <<
     const convertToDate = new Date(data.createdAt).toLocaleString('pt-BR');
@@ -106,7 +95,6 @@ socket.on('sendMessage', (data: any, res: any) => {
 });
 
 function addUser(username: string) {
-    const userID = document.getElementById('users') as HTMLElement;
 
     userID.innerHTML += `
     <ul id="users">
@@ -117,8 +105,21 @@ function addUser(username: string) {
     `;
 }
 
+function removeUser(arrayUsername: IUserInformation[]) {
+    userID.innerHTML = '';
+
+    arrayUsername.forEach(element => {
+        userID.innerHTML += `
+        <ul id="users">
+            <li>
+                 ${element.username}
+            </li>
+        </ul>
+        `;
+    });
+}
+
 function addMessage(username: string, date: Date | string, message: string) {
-    const chatMessagesID = document.getElementById('chat-messages') as HTMLElement;
 
     // += Para SOMAR ao HTML Antes já Adicionado (IMPEDE que um Substitua o outro ) !! <<
     chatMessagesID.innerHTML += `

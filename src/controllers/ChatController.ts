@@ -10,11 +10,21 @@ import { ISendMessage, IUserInformation } from '../@types/interfaces';
 // Tipando um Array de Objetos !! = { [key: string]: string[]; } = {};
 
 let connectedUsers: IUserInformation[] = [];
+let connectedUsersByRoom: IUserInformation[] = [];
 
 export class ChatController {
     async enterChat(req: Request, res: Response) {
         // Fazer um JWT com NOME e ROOM, direcionar para o CHAT e BLOQUEAR essa Rota se estiver "logado" !! <<
         const { username, room } = req.body;
+
+        const checkIfUsernameLogged = connectedUsers.some(el => el.username === username && el.room === room);
+        console.log('TESTE DO NOME:', checkIfUsernameLogged);
+
+        if (checkIfUsernameLogged) {
+            req.flash('errorFlash', 'Já existe um usuário logado com esse usuário !');
+            return res.redirect('/');
+        }
+
 
         try {
             const saveUser = new UserModel({ username, room });
@@ -85,13 +95,26 @@ export class ChatController {
         try {
             await UserModel.findOneAndDelete({ username });
 
-            res.clearCookie('chat_cookie');
+            console.log('connectedUsers Logout ANTES:', connectedUsers);
 
             connectedUsers = connectedUsers.filter(element => {
                 if (element.user_id !== id) {
                     return element;
                 }
             });
+
+            connectedUsersByRoom = connectedUsers.filter((element) => {
+                if (element.room === room) {
+                    return element;
+                }
+            });
+
+            console.log('connectedUser Logout:', connectedUsers);
+            console.log('connectedUsersROOM Logout DEPOIS:', connectedUsersByRoom);
+
+            io.to(room).emit('logoutUser', connectedUsersByRoom);
+
+            res.clearCookie('chat_cookie');
 
             return res.redirect('/');
         }
@@ -108,6 +131,8 @@ export class ChatController {
         const { username, room, id } = req.JWT;
         console.log('username:', username, 'room:', room, 'id:', id);
 
+        // Tentar REDIRECIONAR o io para o /chat com .of()) ou algo assim no Logout !!!! <<<
+
         // socket = Envia para TODOS, MENOS para você mesmo Conectado !! <<
 
         // Troquei on por once porque estava REPETINDO o socket.id VÁRIAS vezes !!
@@ -123,26 +148,25 @@ export class ChatController {
                 room
             };
 
-            io.emit('yourAccount', userInformation);
-
             // Confere CADA Valor de uma especificada Chave DENTRO de um Array e verifica se EXISTE (boolean), 
             // se SIM, retorna true, se NÃO, retorna false !! <<
-            // REMOVER do push no Logout !!!!!! <<<<        // TIRAR o NOME do JÁ logado !! <<  
-            const checkIfLogged = connectedUsers.some(el => el.user_id === id && el.username);
+            const checkIfLogged = connectedUsers.some(el => el.user_id === id);
+            console.log(checkIfLogged);
 
             // IMPORTANTE: Declarei o Array de Objetos FORA da Classe, porque estava RESETANDO a cada Recarregamento da Página !! <<
             if (!checkIfLogged) {
                 connectedUsers.push(userInformation);
             }
 
-            const connectedUsersByRoom = connectedUsers.filter((element) => {
+            connectedUsersByRoom = connectedUsers.filter((element) => {
                 if (element.room === room) {
                     return element;
                 }
             });
 
-            console.log('connectedUsersByRoom:', connectedUsersByRoom);
+            // console.log('connectedUsersByRoom:', connectedUsersByRoom);
 
+            // Arrumar, NÃO está aparecendo em Tempo Real !! <<
             io.to(room).emit('connectedUser', connectedUsersByRoom);
 
             socket.on('connectedUser', data => {
@@ -150,12 +174,12 @@ export class ChatController {
             });
 
             // Tentar SALVAR o socket.id no Banco de Dados e Salvar NOVAMENTE sempre que ele for Atualizado !!
-            const sockets = (await io.fetchSockets()).map(socket => socket.id);
-            console.log('fetchSockets:', sockets);
+            const activeSockets = (await io.fetchSockets()).map(socket => socket.id);
+            // console.log('activeSockets:', activeSockets);
 
             socket.emit('initialMessage', `Bem-vindo ao ChatPapo e à sala ${room} !`);
 
-            socket.on('sendMessage', async (data: ISendMessage, callback: Function) => {
+            socket.on('sendMessage', async (data: ISendMessage) => {
                 // Salvando a Mensagem
                 data.message = data.message;
                 data.username = username;
