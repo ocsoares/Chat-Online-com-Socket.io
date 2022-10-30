@@ -37,10 +37,13 @@ server.use(cookieParser(process.env.COOKIE_SECRET));
 
 server.use(session({
     name: 'chat_app',
-    store: MongoStore.create({ mongoUrl: process.env.ATLAS_URL }),
     secret: process.env.COOKIE_SECRET as string,
     resave: true,
     saveUninitialized: true,
+    store: MongoStore.create({
+        mongoUrl: process.env.ATLAS_URL,
+        ttl: 43200,
+    }),
     cookie: {
         secure: process.env.NODE_ENV === 'production' ? true : false,
         httpOnly: true
