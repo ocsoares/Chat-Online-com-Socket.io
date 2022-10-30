@@ -1,0 +1,11 @@
+services:
+  # A Docker web service
+  - type: web
+    name: chat-online
+    env: node
+    rootDir: src
+    plan: standart
+    envVars:
+      - key: ATLAS_URL
+    buildCommand: npm install
+    startCommand: npm start

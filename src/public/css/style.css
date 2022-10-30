@@ -64,13 +64,13 @@ a {
     border: none
 }
 
-.form-control input,
+#form-control input,
 select {
     border: none;
     background-color: #B0C4DE;
 }
 
-.join-main button {
+#join-main button {
     background-color: #B0C4DE;
 }
 
@@ -197,13 +197,13 @@ p {
 }
 
 /* Join Page */
-.join-container {
+#join-container {
     max-width: 500px;
     margin: 80px auto;
     color: #fff;
 }
 
-.join-header {
+#join-header {
     text-align: center;
     padding: 20px;
     background: var(--dark-color-a);
@@ -211,39 +211,39 @@ p {
     border-top-right-radius: 5px;
 }
 
-.join-main {
+#join-main {
     padding: 30px 40px;
     background: var(--dark-color-b);
 }
 
-.join-main p {
+#join-main p {
     margin-bottom: 20px;
 }
 
-.join-main .form-control {
+#join-main #form-control {
     margin-bottom: 20px;
 }
 
-.join-main label {
+#join-main label {
     display: block;
     margin-bottom: 5px;
 }
 
-.join-main input[type='text'] {
+#join-main input[type='text'] {
     font-size: 16px;
     padding: 5px;
     height: 40px;
     width: 100%;
 }
 
-.join-main select {
+#join-main select {
     font-size: 16px;
     padding: 5px;
     height: 40px;
     width: 100%;
 }
 
-.join-main .btn {
+#join-main .btn {
     margin-top: 20px;
     width: 100%;
 }
