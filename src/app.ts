@@ -23,6 +23,9 @@ const PORT = 5000;
 
 const __dirname = path.resolve();
 
+console.log('Node env:', process.env.NODE_ENV);
+console.log('Atlas env:', process.env.ATLAS_URL);
+
 server.set('view engine', 'ejs');
 
 server.use(express.static(__dirname + '/src/views'));
