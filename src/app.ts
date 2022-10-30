@@ -10,6 +10,7 @@ import cookieParser from 'cookie-parser';
 import { connectionAtlas } from './database/mongoose';
 import connectFlash from 'connect-flash';
 import { Request, Response, NextFunction } from 'express';
+import MongoStore from 'connect-mongo';
 
 // OBS: Para o Docker/compose funcionar com TS e transpilar para JS, basta seguir os scripts e códigos dos Arquivos docker e MANTER RODANDO o
 // script tscdir Localmente para Transpilar e o Docker detectar a mudança !! <<
@@ -36,6 +37,7 @@ server.use(cookieParser(process.env.COOKIE_SECRET));
 
 server.use(session({
     name: 'chat_app',
+    store: MongoStore.create({ mongoUrl: process.env.ATLAS_URL }),
     secret: process.env.COOKIE_SECRET as string,
     resave: true,
     saveUninitialized: true,
