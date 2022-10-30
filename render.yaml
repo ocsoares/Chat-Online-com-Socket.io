@@ -5,9 +5,7 @@ services:
     env: node
     rootDir: src
     plan: free
-    envVarGroups:
-    - name: atlas-settings
-    envVars:
-      - key: ATLAS_URL
+    key: ATLAS_URL
+    sync: false
     buildCommand: npm install
     startCommand: npm start
