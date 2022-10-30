@@ -4,7 +4,7 @@ services:
     name: chat-online
     env: node
     rootDir: src
-    plan: standart
+    plan: free
     envVars:
       - key: ATLAS_URL
     buildCommand: npm install
