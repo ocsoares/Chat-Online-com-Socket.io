@@ -15,5 +15,5 @@ services:
     plan: free
     envVars:
       - fromGroup: ATLAS_SETTINGS
-    buildCommand: npm install && npm run tscdir
+    buildCommand: npm install && npm run build
     startCommand: npm start
