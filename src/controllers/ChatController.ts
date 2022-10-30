@@ -22,8 +22,9 @@ export class ChatController {
 
         if (checkIfUsernameLogged) {
             req.flash('errorFlash', 'Já existe um usuário logado com esse usuário !');
-            console.log('REQ FLASH:', req.flash('errorFlash'));
-            return res.redirect('/');
+            req.session.save(() => {
+                return res.redirect('/');
+            });
         }
 
 
