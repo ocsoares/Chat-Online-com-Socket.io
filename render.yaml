@@ -1,7 +1,7 @@
 previewsEnabled: true
 
 envVarGroups:
-  - name: ATLAS_SETTINGS
+  - name: ENV_SETTINGS
     envVars:
       - key: ATLAS_URL
         sync: false
