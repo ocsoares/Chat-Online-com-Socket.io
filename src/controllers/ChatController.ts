@@ -18,7 +18,6 @@ export class ChatController {
         const { username, room } = req.body;
 
         const checkIfUsernameLogged = connectedUsers.some(el => el.username === username && el.room === room);
-        console.log('TESTE DO NOME:', checkIfUsernameLogged);
 
         if (checkIfUsernameLogged) {
             if (Object.hasOwnProperty.bind(req.signedCookies)('chat_cookie')) {
@@ -99,8 +98,6 @@ export class ChatController {
         try {
             await UserModel.findOneAndDelete({ username });
 
-            console.log('connectedUsers Logout ANTES:', connectedUsers);
-
             connectedUsers = connectedUsers.filter(element => {
                 if (element.user_id !== id) {
                     return element;
@@ -112,9 +109,6 @@ export class ChatController {
                     return element;
                 }
             });
-
-            console.log('connectedUser Logout:', connectedUsers);
-            console.log('connectedUsersROOM Logout DEPOIS:', connectedUsersByRoom);
 
             io.to(room).emit('logoutUser', connectedUsersByRoom);
 
@@ -133,9 +127,6 @@ export class ChatController {
     // Usei por aqui porque precisa, no meu caso, ter o JWT que vem do Request !! <<  
     async webSocket(req: Request, res: Response, next: NextFunction) {
         const { username, room, id } = req.JWT;
-        console.log('username:', username, 'room:', room, 'id:', id);
-
-        // Tentar REDIRECIONAR o io para o /chat com .of()) ou algo assim no Logout !!!! <<<
 
         // socket = Envia para TODOS, MENOS para você mesmo Conectado !! <<
 
@@ -155,7 +146,6 @@ export class ChatController {
             // Confere CADA Valor de uma especificada Chave DENTRO de um Array e verifica se EXISTE (boolean), 
             // se SIM, retorna true, se NÃO, retorna false !! <<
             const checkIfLogged = connectedUsers.some(el => el.user_id === id);
-            console.log(checkIfLogged);
 
             // IMPORTANTE: Declarei o Array de Objetos FORA da Classe, porque estava RESETANDO a cada Recarregamento da Página !! <<
             if (!checkIfLogged) {
@@ -168,16 +158,10 @@ export class ChatController {
                 }
             });
 
-            // console.log('connectedUsersByRoom:', connectedUsersByRoom);
-
             // Arrumar, NÃO está aparecendo em Tempo Real !! <<
             io.to(room).emit('connectedUser', connectedUsersByRoom);
 
-            socket.on('connectedUser', data => {
-                console.log('connectedUser:', data);
-            });
-
-            // Tentar SALVAR o socket.id no Banco de Dados e Salvar NOVAMENTE sempre que ele for Atualizado !!
+            // Mostra TODOS os Sockets Ativos !! <<
             const activeSockets = (await io.fetchSockets()).map(socket => socket.id);
             // console.log('activeSockets:', activeSockets);
 
@@ -188,8 +172,6 @@ export class ChatController {
                 data.message = data.message;
                 data.username = username;
                 data.room = room;
-
-                console.log(data);
 
                 let saveMessage;
 

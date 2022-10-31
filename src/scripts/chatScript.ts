@@ -24,18 +24,10 @@ interface IUserInformation {
 let connectedUserArray: IUserInformation[] = [];
 
 socket.on('logoutUser', (connectedUser: IUserInformation[]) => {
-    console.log('logoutUser:', connectedUser);
-
     removeUser(connectedUser);
 });
 
 socket.on('connectedUser', (data: IUserInformation[]) => {
-
-    console.log('data no chatScript:', data);
-
-    // const checkIfLogged = connectedUserArray.some(el => el.user_id ? true : false);
-    // console.log('checkifLogged:', checkIfLogged);
-
     data.forEach(element => {
         if (!connectedUserArray.find(index => index.user_id === element.user_id)) {
             connectedUserArray.push(element);
@@ -43,11 +35,6 @@ socket.on('connectedUser', (data: IUserInformation[]) => {
 
         }
     });
-
-    // connectedUserArray = data;
-    // removeUser(connectedUserArray);
-
-    console.log('connectedUserArray:', connectedUserArray);
 });
 
 const inputMessage = document.getElementById('msg') as HTMLElement;
@@ -60,15 +47,11 @@ socket.on('initialMessage', (data: string) => {
     addMessage('ChatPapo', currentDate, data);
 });
 
-socket.on('userLogout', (data: string) => {
-    console.log('userLogout:', data);
-});
-
 const scrollDown = document.getElementById('chat-messages') as HTMLElement;
 
 scrollDown.scrollTop = scrollDown.scrollHeight; // Scroll para BAIXO !!
 
-// event: any para ter Acesso ao .value !! <<
+// event: | any para ter Acesso ao .value !! <<
 inputMessage.addEventListener('keypress', (event: KeyboardEvent | any) => {
     if (event.key === 'Enter') {
         const sendMessage = event.target.value;
@@ -85,9 +68,6 @@ inputMessage.addEventListener('keypress', (event: KeyboardEvent | any) => {
 });
 
 socket.on('sendMessage', (data: ISendMessage) => {
-    // console.log('No navegador (chatScript):', data);
-    console.log('messageDATA:', data);
-
     // A data estava vindo pelo evento 'sendMessage' como STRING, e não como Date, então tive que Converter para Date !! <<
     const convertToDate = new Date(data.createdAt).toLocaleString('pt-BR');
 
