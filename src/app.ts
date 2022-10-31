@@ -31,7 +31,7 @@ server.use(express.static(__dirname + '/src/public'));
 server.use(express.static(__dirname + '/dist'));
 server.use(express.static(__dirname + '/assets'));
 
-server.use(cors({ credentials: true }));
+server.use(cors());
 
 server.use(cookieParser(process.env.COOKIE_SECRET));
 
@@ -45,7 +45,7 @@ server.use(session({
         ttl: 43200,
     }),
     cookie: {
-        secure: process.env.NODE_ENV === 'production' ? true : false, // Nesse caso, com isso ATIVO, NÃO deu certo !! <<
+        // secure: process.env.NODE_ENV === 'production' ? true : false, // Nesse caso, com isso ATIVO, NÃO deu certo !! <<
         httpOnly: true,
         maxAge: 43200
     }
