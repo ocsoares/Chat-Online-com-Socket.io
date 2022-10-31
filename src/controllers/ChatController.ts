@@ -14,7 +14,6 @@ let connectedUsersByRoom: IUserInformation[] = [];
 
 export class ChatController {
     async enterChat(req: Request, res: Response) {
-        // Fazer um JWT com NOME e ROOM, direcionar para o CHAT e BLOQUEAR essa Rota se estiver "logado" !! <<
         const { username, room } = req.body;
 
         const checkIfUsernameLogged = connectedUsers.some(el => el.username === username && el.room === room);
