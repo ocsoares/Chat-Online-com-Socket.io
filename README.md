@@ -32,7 +32,7 @@ O projeto, resumidamente, consiste em um **Chat** online em *tempo real*, com o 
 ## Tela inicial
 ![Tela inicial](https://raw.githubusercontent.com/ocsoares/Chat-Online-com-Socket.io/master/assets/home.jpg)
 
-## Alerta de erro de mesmos usuários conectados
+## Alerta de erro de mesmos usuários conectados em uma sala
 ![Alerta erro usuários](https://raw.githubusercontent.com/ocsoares/Chat-Online-com-Socket.io/master/assets/alerta-erro-usuarios.jpg)
 
 ## Chat
@@ -43,9 +43,13 @@ O projeto, resumidamente, consiste em um **Chat** online em *tempo real*, com o 
 - Typescript
 - Nodejs
 - Express
+- express-session
+- cors
+- socket.io
 - Atlas (MongoDB)
 - JWT
 - connect-flash (Alertas)
+- connect-mongo
 
 ## Front end
 - HTML (EJS)

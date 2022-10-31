@@ -23,7 +23,7 @@ export class ChatController {
                 res.clearCookie('chat_cookie');
             }
 
-            req.flash('errorFlash', 'Já existe um usuário logado com esse usuário !');
+            req.flash('errorFlash', 'Já existe um usuário conectado nessa sala com esse nome !');
             return res.redirect('/');
         }
 
