@@ -31,21 +31,21 @@ server.use(express.static(__dirname + '/src/public'));
 server.use(express.static(__dirname + '/dist'));
 server.use(express.static(__dirname + '/assets'));
 
-server.use(cors());
+server.use(cors({ credentials: true }));
 
 server.use(cookieParser(process.env.COOKIE_SECRET));
 
 server.use(session({
-    name: 'chat_app',
+    name: 'chat_session',
     secret: process.env.COOKIE_SECRET as string,
     resave: true,
-    saveUninitialized: false,
-    store: MongoStore.create({
+    saveUninitialized: true,
+    store: new MongoStore({
         mongoUrl: process.env.ATLAS_URL,
         ttl: 43200,
     }),
     cookie: {
-        secure: process.env.NODE_ENV === 'production' ? true : false,
+        // secure: process.env.NODE_ENV === 'production' ? true : false,
         httpOnly: true,
         maxAge: 43200
     }

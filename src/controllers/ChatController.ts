@@ -21,10 +21,12 @@ export class ChatController {
         console.log('TESTE DO NOME:', checkIfUsernameLogged);
 
         if (checkIfUsernameLogged) {
+            if (Object.hasOwnProperty.bind(req.signedCookies)('chat_cookie')) {
+                res.clearCookie('chat_cookie');
+            }
+
             req.flash('errorFlash', 'Já existe um usuário logado com esse usuário !');
-            req.session.save(() => {
-                return res.redirect('/');
-            });
+            return res.redirect('/');
         }
 
 
