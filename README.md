@@ -75,5 +75,5 @@ configurar o arquivo mongoose.ts
 npm run build
 
 # executar o projeto
-npm run start
+npm start
 ```
