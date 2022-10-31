@@ -38,8 +38,8 @@ server.use(cookieParser(process.env.COOKIE_SECRET));
 server.use(session({
     name: 'chat_app',
     secret: process.env.COOKIE_SECRET as string,
-    resave: false,
-    saveUninitialized: true,
+    resave: true,
+    saveUninitialized: false,
     store: MongoStore.create({
         mongoUrl: process.env.ATLAS_URL,
         ttl: 43200,
