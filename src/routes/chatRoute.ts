@@ -23,7 +23,7 @@ chatRoute.get('/chat', chatController.checkIfEnterChat, chatController.webSocket
 
     // Tive que usar o await assim por causa do reverse(), porque o sort retornou ordenado Errado para o meu uso do HTML !! <<
     // sort -1 = Descendente !!
-    const returnMessagesRoom = (await MessageModel.find({ room }).sort({ createdAt: -1 }).limit(4)).reverse();
+    const returnMessagesRoom = (await MessageModel.find({ room }).sort({ createdAt: -1 }).limit(50)).reverse();
 
     res.render(chatEJS, { username, room, returnMessagesRoom });
 });
