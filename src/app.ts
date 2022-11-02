@@ -42,7 +42,7 @@ server.use(session({
     saveUninitialized: true,
     store: new MongoStore({
         mongoUrl: process.env.ATLAS_URL,
-        ttl: 43200,
+        ttl: 18000,
     }),
     cookie: {
         // secure: process.env.NODE_ENV === 'production' ? true : false, // Nesse caso, com isso ATIVO, NÃO deu certo !! <<

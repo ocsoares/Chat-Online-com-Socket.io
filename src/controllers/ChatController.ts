@@ -5,6 +5,7 @@ import { UserModel } from '../models/UserModel';
 import { io } from '../config/exportServersAnd-io';
 import { MessageModel } from '../models/MessageModel';
 import { ISendMessage, IUserInformation } from '../@types/interfaces';
+import { redisClient } from '../config/redisConfig';
 
 // >> COLOCAR na Pasta do Curso Udemy Tipagens TS !! <<
 // Tipando um Array de Objetos !! = { [key: string]: string[]; } = {};
@@ -16,6 +17,11 @@ export class ChatController {
     async enterChat(req: Request, res: Response) {
         const { username, room } = req.body;
 
+        if (!username || !room) {
+            req.flash('errorFlash', 'Preencha corretamente todos os campos !');
+            return res.redirect('/');
+        }
+
         const checkIfUsernameLogged = connectedUsers.some(el => el.username === username && el.room === room);
 
         if (checkIfUsernameLogged) {
@@ -26,7 +32,6 @@ export class ChatController {
             req.flash('errorFlash', 'Já existe um usuário conectado nessa sala com esse nome !');
             return res.redirect('/');
         }
-
 
         try {
             const saveUser = new UserModel({ username, room });
@@ -80,6 +85,14 @@ export class ChatController {
         try {
             const verifyJWT = jwt.verify(chat_cookie, process.env.JWT_HASH as string);
 
+            // const checkIfJWTBlackList = await redisClient.get(`blackList_${chat_cookie}`);
+
+            // if (checkIfJWTBlackList) {
+            //     res.clearCookie('chat_cookie');
+            //     req.flash('errorFlash', 'Token inválido ou expirado !');
+            //     // return res.redirect('/'); // Como JÁ VAI Limpar o cookie, vai Redirecionar sozinho...
+            // }
+
             if (verifyJWT) {
                 req.JWT = verifyJWT;
                 next();
@@ -92,6 +105,7 @@ export class ChatController {
     }
 
     async logout(req: Request, res: Response) {
+        const { chat_cookie } = req.signedCookies;
         const { username, room, id } = req.JWT;
 
         try {
@@ -110,6 +124,10 @@ export class ChatController {
             });
 
             io.to(room).emit('logoutUser', connectedUsersByRoom);
+
+            // const redisExpireTime = 18000; // 5 Horas ! <<
+
+            // await redisClient.set(`blackListJWT_${chat_cookie}`, chat_cookie, 'EX', redisExpireTime);
 
             res.clearCookie('chat_cookie');
 
@@ -134,6 +152,10 @@ export class ChatController {
             console.log('socket ID:', socket.id);
 
             socket.join(room);
+
+            socket.on('closeNavBar', (data) => {
+                console.log('closeNavBar:', data);
+            });
 
             const userInformation: IUserInformation = {
                 username,
@@ -162,7 +184,7 @@ export class ChatController {
 
             // Mostra TODOS os Sockets Ativos !! <<
             const activeSockets = (await io.fetchSockets()).map(socket => socket.id);
-            // console.log('activeSockets:', activeSockets);
+            console.log('activeSockets:', activeSockets);
 
             socket.emit('initialMessage', `Bem-vindo ao ChatPapo e à sala ${room} !`);
 

@@ -27,6 +27,21 @@ socket.on('logoutUser', (connectedUser: IUserInformation[]) => {
     removeUser(connectedUser);
 });
 
+// window.addEventListener('close', (event) => {
+//     console.log('FECHOU PORRAAAAAAAAAAAAAA');
+//     window.location.href = '/logout';
+// });
+
+new Promise((resolve, reject) => {
+    window.addEventListener('unload', (event) => {
+        resolve(teste());
+    });
+});
+
+function teste() {
+    socket.emit('closeNavBar', 'FECHOU SIMMMMM');
+}
+
 socket.on('connectedUser', (data: IUserInformation[]) => {
     data.forEach(element => {
         if (!connectedUserArray.find(index => index.user_id === element.user_id)) {
