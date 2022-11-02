@@ -7,9 +7,6 @@ import { MessageModel } from '../models/MessageModel';
 import { ISendMessage, IUserInformation } from '../@types/interfaces';
 import { redisClient } from '../config/redisConfig';
 
-// >> COLOCAR na Pasta do Curso Udemy Tipagens TS !! <<
-// Tipando um Array de Objetos !! = { [key: string]: string[]; } = {};
-
 let connectedUsers: IUserInformation[] = [];
 let connectedUsersByRoom: IUserInformation[] = [];
 
@@ -53,7 +50,6 @@ export class ChatController {
             return res.redirect('/chat');
         }
         catch (error: any) {
-            console.log(error.message);
             return res.redirect('/');
         }
     }
@@ -85,13 +81,14 @@ export class ChatController {
         try {
             const verifyJWT = jwt.verify(chat_cookie, process.env.JWT_HASH as string);
 
-            // const checkIfJWTBlackList = await redisClient.get(`blackList_${chat_cookie}`);
+            const checkIfJWTBlackList = await redisClient.get(`blackListJWT_${chat_cookie}`);
+            console.log('CHECK BLACKLIST:', checkIfJWTBlackList);
 
-            // if (checkIfJWTBlackList) {
-            //     res.clearCookie('chat_cookie');
-            //     req.flash('errorFlash', 'Token inválido ou expirado !');
-            //     // return res.redirect('/'); // Como JÁ VAI Limpar o cookie, vai Redirecionar sozinho...
-            // }
+            if (checkIfJWTBlackList) {
+                res.clearCookie('chat_cookie');
+                req.flash('errorFlash', 'Token inválido ou expirado !');
+                return res.redirect('/');
+            }
 
             if (verifyJWT) {
                 req.JWT = verifyJWT;
@@ -99,7 +96,7 @@ export class ChatController {
             }
         }
         catch (error: any) {
-            // console.log(error.message);
+            req.flash('errorFlash', 'Token inválido ou expirado !');
             return res.redirect('/');
         }
     }
@@ -125,16 +122,15 @@ export class ChatController {
 
             io.to(room).emit('logoutUser', connectedUsersByRoom);
 
-            // const redisExpireTime = 18000; // 5 Horas ! <<
+            const redisExpireTime = 18000; // 5 Horas ! <<
 
-            // await redisClient.set(`blackListJWT_${chat_cookie}`, chat_cookie, 'EX', redisExpireTime);
+            await redisClient.set(`blackListJWT_${chat_cookie}`, chat_cookie, 'EX', redisExpireTime);
 
             res.clearCookie('chat_cookie');
 
             return res.redirect('/');
         }
         catch (error: any) {
-            console.log(error.message);
             res.clearCookie('chat_cookie');
             return res.redirect('/');
         }

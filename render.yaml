@@ -7,7 +7,7 @@ envVarGroups:
         sync: false
 
 services:
-  # A Docker web service
+  # Node service
   - type: web
     name: chat-online
     env: node
@@ -17,3 +17,8 @@ services:
       - fromGroup: ATLAS_SETTINGS
     buildCommand: npm install && npm run build
     startCommand: npm start
+  - type: redis
+    name: redis-service
+    ipAllowList:
+      - source: IP_ENV
+    plan: free
