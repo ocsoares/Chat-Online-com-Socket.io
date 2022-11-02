@@ -17,9 +17,3 @@ services:
       - fromGroup: ENV_SETTINGS
     buildCommand: npm install && npm run build
     startCommand: npm start
-  # Redis service;
-  - type: redis
-    name: lightning
-    ipAllowList: # required - allow external connections from everywhere
-      - source: 0.0.0.0/0
-        description: everywhere
