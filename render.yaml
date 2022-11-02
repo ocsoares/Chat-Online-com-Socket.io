@@ -14,11 +14,14 @@ services:
     rootDir: src
     plan: free
     envVars:
-      - fromGroup: ATLAS_SETTINGS
+      - fromGroup: ENV_SETTINGS
     buildCommand: npm install && npm run build
     startCommand: npm start
+  # Redis service
   - type: redis
     name: redis-service
+    envVars:
+      - fromGroup: ENV_SETTINGS
     ipAllowList:
       - source: IP_ENV
     plan: free
