@@ -2,10 +2,9 @@ import 'dotenv/config';
 import Redis from 'ioredis';
 
 const redisClient = new Redis({ // Fiz assim porque NÃO estava conectando no Docker !! <<
-    path: process.env.REDIS_HOST || 'redis://redis:6379',
-    // host: process.env.REDIS_HOST || 'localhost',
-    // port: Number(process.env.REDIS_PORT) || 6379,
-    password: process.env.REDIS_PASS || undefined
+    host: process.env.REDIS_HOST || 'redis://redis:6379',
+    port: Number(process.env.REDIS_PORT) || 6379,
+    password: undefined || process.env.REDIS_PASS
 });
 
 redisClient.on('connect', () => {
