@@ -19,8 +19,7 @@ services:
     startCommand: npm start
   # Redis service;
   - type: redis
-    name: redis-service
-    ipAllowList:
+    name: lightning
+    ipAllowList: # required - allow external connections from everywhere
       - source: 0.0.0.0/0
-      - description: any
-    plan: free
+        description: everywhere
