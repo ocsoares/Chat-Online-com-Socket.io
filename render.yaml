@@ -17,7 +17,7 @@ services:
       - fromGroup: ENV_SETTINGS
     buildCommand: npm install && npm run build
     startCommand: npm start
-  # Redis service
+  # Redis service;
   - type: redis
     name: redis-service
     envVars:
