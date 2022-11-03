@@ -65,8 +65,6 @@ export class ChatController {
             }
         }
         catch (error: any) {
-            console.log(error.message);
-
             if (error.message === 'jwt expired') {
                 res.clearCookie('chat_cookie');
             }
@@ -82,7 +80,6 @@ export class ChatController {
             const verifyJWT = jwt.verify(chat_cookie, process.env.JWT_HASH as string);
 
             const checkIfJWTBlackList = await redisClient.get(`blackListJWT_${chat_cookie}`);
-            console.log('CHECK BLACKLIST:', checkIfJWTBlackList);
 
             if (checkIfJWTBlackList) {
                 res.clearCookie('chat_cookie');

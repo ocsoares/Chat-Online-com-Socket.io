@@ -1,5 +1,3 @@
-# *OBS: Atualizações estão por vir! 🔨*
-
 # **ChatPapo** - Um chat online em tempo real
 [![NPM](https://img.shields.io/npm/l/react)](https://github.com/neliocursos/exemplo-readme/blob/main/LICENSE) 
 
@@ -13,6 +11,7 @@ https://www.linkedin.com/in/ocauasoares/
 
 ## Hospedado/Deploy no Render:
 https://chat-online.onrender.com <br>
+
 **ATENÇÃO:** Caso o Deploy não tenha acesso em um determinado período de tempo, ele ficará offline até que tenha algum acesso. Então, caso o link demore a carregar, é completamente normal e basta esperar para utilizar o site.
 
 O projeto, resumidamente, consiste em um **Chat** online em *tempo real*, com o auxílio de **sockets**.
@@ -44,6 +43,7 @@ O projeto, resumidamente, consiste em um **Chat** online em *tempo real*, com o 
 - Nodejs
 - Express
 - express-session
+- Redis
 - cors
 - socket.io
 - Atlas (MongoDB)
